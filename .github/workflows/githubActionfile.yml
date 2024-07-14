@@ -72,11 +72,25 @@ jobs:
         run: |
           chmod 400 ./Ansible/access_to_ec2.pem         
 
+      - name: Add SSH keyscan output to known_hosts
+        run: |
+          ssh-keyscan -H ${{ steps.tf-outputs.outputs.web_server_public_ip }} >> ~/.ssh/known_hosts
+
+      - name: Wait for 2 minutes
+        run: sleep 200
+  
+
       - name: Run Ansible playbook
         run: |
           ansible-playbook -i ./Ansible/ansible_inventory.ini ./Ansible/installDjangoapp.yaml
-  
-  
+        env:
+          AWS_DEFAULT_REGION: eu-west-2
+          AWS_REGION: eu-west-2
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+
+          
       - name: Wait for 2 minutes
         run: sleep 200
 
