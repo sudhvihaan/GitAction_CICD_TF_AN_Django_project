@@ -60,7 +60,7 @@ resource "aws_route_table_association" "name" {
 // Security Group for public subnet 
 resource "aws_security_group" "sg_for_publicsubnet" {
   name        = "wp"
-  description = "Allow TLS inbound traffic"
+  description = "Allow TLS inbound traffic-2"
   vpc_id      = aws_vpc.vpc.id
 
 
