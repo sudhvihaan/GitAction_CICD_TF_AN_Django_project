@@ -1,1 +1,17 @@
 
+name: Test Terraform
+
+on:
+  push:
+    branches:
+      - main  # Adjust the branch as per your requirement test
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+ 
