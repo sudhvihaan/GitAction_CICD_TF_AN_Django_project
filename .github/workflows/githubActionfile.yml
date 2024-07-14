@@ -3,7 +3,7 @@ name: Test Terraform
 on:
   push:
     branches:
-      - main  # Adjust the branch as per your requirement
+      - main  # Adjust the branch as per your requirement-tttt
 
 jobs:
   terraform:
@@ -17,67 +17,23 @@ jobs:
         run: |
           echo "Displaying repository contents..."
           ls -R
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: false  # Ensure terraform_wrapper is set to false    
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
-
-      - name: Initialize Terraform
-        run: terraform init
-        working-directory: ./Terraform
-
-      - name: Plan Terraform
-        run: terraform plan
-        working-directory: ./Terraform
-
-      - name: Apply Terraform
-        run: terraform apply --auto-approve
-        working-directory: ./Terraform
-
-      - name: Get outputs
-        uses: dflook/terraform-output@v1
-        id: tf-outputs
-        with:
-          path: ./Terraform  # Adjust the path to your Terraform configuration directory
-
-      - name: Display Public IP
-        run: |
-          echo "Public IP Address: ${{ steps.tf-outputs.outputs.web_server_public_ip }}"
-        
+ 
+ 
+ 
       - name: Generate Ansible Inventory
         run: |
           echo "[my_ec2_instances]" > ./Ansible/ansible_inventory.ini
-          echo "${{ steps.tf-outputs.outputs.web_server_public_ip }} ansible_user=ec2-user ansible_ssh_private_key_file=/home/runner/.ssh/id_rsa" >> ./Ansible/ansible_inventory.ini
+          echo "10.0.1.1 ansible_user=ec2-user ansible_ssh_private_key_file=/home/runner/.ssh/id_rsa" >> ./Ansible/ansible_inventory.ini
     
-      - name: Display Ansible Inventory
+      - name: Display Ansible Ini
         run: |
           echo "Contents of Ansible Inventory:"
           cat ./Ansible/ansible_inventory.ini    
 
-      - name: Setup SSH
-        shell: bash
+      - name: Display Ansible Ini
         run: |
-          eval `ssh-agent -s`
-          mkdir -p /home/runner/.ssh/
-          touch /home/runner/.ssh/id_rsa
-          echo "${{ secrets.SSH_KEY }}" > /home/runner/.ssh/id_rsa
-          chmod 600 /home/runner/.ssh/id_rsa
-          ssh-keyscan -H ${{ steps.tf-outputs.outputs.web_server_public_ip }} >> /home/runner/.ssh/known_hosts
+            ls ./Ansible
+               
+  
 
-      - name: Wait for 2 minutes
-        if: always()  # Ensure this step runs regardless of previous steps
-        run: sleep 200
-
-      - name: Run Ansible playbook
-        shell: bash 
-        run: |
-          cd ./Ansible
-          ansible-playbook -vvv --private-key /home
+ 
