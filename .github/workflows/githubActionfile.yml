@@ -118,7 +118,7 @@ jobs:
 
       - name: Wait for 2 minutes
         if: always()  # Ensure this step runs regardless of previous steps
-        run: sleep 2000
+        run: sleep 3000
     
           # Add finally block to ensure destroy step is always executed
       - name: Clean up Terraform
