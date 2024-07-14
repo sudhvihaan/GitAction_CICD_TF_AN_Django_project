@@ -56,10 +56,7 @@ resource "aws_route_table_association" "name" {
     route_table_id = aws_route_table.rout_table_public.id  
 }
 
-resource "aws_key_pair" "acesskey" {
-  
-}
-
+ 
 // Security Group for public subnet 
 resource "aws_security_group" "sg_for_publicsubnet" {
   name        = "wp"
