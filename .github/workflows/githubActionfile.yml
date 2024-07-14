@@ -72,17 +72,27 @@ jobs:
         run: |
           chmod 400 ./Ansible/access_to_ec2.pem         
 
-      - name: Add SSH keyscan output to known_hosts
+      - name: Setup SSH
+        shell: bash
         run: |
-          ssh-keyscan -H ${{ steps.tf-outputs.outputs.web_server_public_ip }} >> ~/.ssh/known_hosts
+            eval `ssh-agent -s`
+            mkdir -p /home/runner/.ssh/
+            touch /home/runner/.ssh/id_rsa
+            echo -e "${{secrets.SSH_KEY}}" > /home/runner/.ssh/id_rsa
+            chmod 600 /home/runner/.ssh/id_rsa
+            ssh-keyscan -H ${{ steps.tf-outputs.outputs.web_server_public_ip }} >> /home/runner/.ssh/known_hosts
+  
 
       - name: Wait for 2 minutes
+        if: always()  # Ensure this step runs regardless of previous steps
         run: sleep 200
   
 
       - name: Run Ansible playbook
+        shell: bash 
         run: |
-          ansible-playbook -i ./Ansible/ansible_inventory.ini ./Ansible/installDjangoapp.yaml
+          cd ./Ansible
+          ansible-playbook -vvv --private-key /home/runner/.ssh/id_rsa -u ec2-user -i ./ansible_inventory.ini ./installDjangoapp.yaml
         env:
           AWS_DEFAULT_REGION: eu-west-2
           AWS_REGION: eu-west-2
@@ -90,8 +100,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 
-          
       - name: Wait for 2 minutes
+        if: always()  # Ensure this step runs regardless of previous steps
         run: sleep 200
 
       # Add finally block to ensure destroy step is always executed
