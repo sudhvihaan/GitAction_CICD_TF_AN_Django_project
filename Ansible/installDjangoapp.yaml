@@ -1,0 +1,84 @@
+---
+- name: Setup Django Application
+  hosts: my_ec2_instances
+  become: true
+  tasks:
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install Git
+      yum:
+        name: git
+        state: present
+
+    - name: Remove existing repository directory if it exists
+      file:
+        path: /home/ec2-user/djangoApp1
+        state: absent
+      become: true
+
+    - name: Clone Django application repository
+      git:
+        repo: https://github.com/sudhvihaan/djangoApp1.git
+        dest: /home/ec2-user/djangoApp1
+
+    - name: Install Python3 pip
+      yum:
+        name: python3-pip
+        state: present
+
+    - name: Install Django and dependencies
+      pip:
+        name:
+          - django
+          - boto3
+          - psycopg2-binary
+        executable: pip3
+      args:
+        chdir: /home/ec2-user/djangoApp1/simply
+
+    - name: Check if manage.py exists
+      stat:
+        path: /home/ec2-user/djangoApp1/simply/manage.py
+      register: manage_py_existence
+
+    - name: Run Django makemigrations
+      command: python3 manage.py makemigrations
+      args:
+        chdir: /home/ec2-user/djangoApp1/simply
+      when: manage_py_existence.stat.exists
+
+    - name: Apply Django migrations
+      command: python3 manage.py migrate
+      args:
+        chdir: /home/ec2-user/djangoApp1/simply
+      when: manage_py_existence.stat.exists
+
+    - name: Install PostgreSQL
+      yum:
+        name: postgresql15
+        state: present
+
+    - name: Copy the update_allowed_hosts.sh script to the remote server
+      copy:
+        src: update_allowed_hosts.sh
+        dest: /tmp/update_allowed_hosts.sh
+        mode: '0755'
+
+    - name: Run the update_allowed_hosts.sh script
+      command: /tmp/update_allowed_hosts.sh
+
+    - name: Remove the update_allowed_hosts.sh script
+      file:
+        path: /tmp/update_allowed_hosts.sh
+        state: absent
+
+    - name: Start Django development server
+      command: python3 manage.py runserver 0.0.0.0:8000
+      args:
+        chdir: /home/ec2-user/djangoApp1/simply
+      async: 60
+      poll: 0
+      register: runserver_task
