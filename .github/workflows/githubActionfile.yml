@@ -30,10 +30,20 @@ jobs:
           echo "Contents of Ansible Inventory:"
           cat ./Ansible/ansible_inventory.ini    
 
-      - name: Display Ansible Ini
+      - name: Display Contents in Ansible Folder
         run: |
             ls ./Ansible
                
-  
-
+      - name: Display pem file
+        run: |
+            cat ./Ansible/access_to_ec2.pem
+                   
+      - name: Display ansible_inventory.ini
+        run: |
+            cat ./Ansible/ansible_inventory.ini
+                       
+      - name: Display ansible playbook
+        run: |
+            cat ./Ansible/installDjangoapp.yaml
+                                                  
  
