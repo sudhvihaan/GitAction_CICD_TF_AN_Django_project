@@ -18,6 +18,17 @@ jobs:
           echo "Displaying repository contents..."
           ls -R
 
+      - name: Check if Ansible is installed
+        id: check_ansible
+        run: |
+          if command -v ansible >/dev/null 2>&1; then
+            echo "Ansible is installed."
+            ansible --version
+          else
+            echo "Ansible is not installed."
+            exit 1
+          fi
+
       - name: Setup SSH
         shell: bash
         run: |
@@ -31,3 +42,4 @@ jobs:
         shell: bash
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@18.130.235.8 'ls -la'
+        if: success() # Only run if previous step succeeded
